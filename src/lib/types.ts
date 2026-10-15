@@ -95,6 +95,8 @@ export type Order = {
   bcvRate: number;
   totalBs: number;
   history: { at: string; status: OrderStatus; note?: string }[];
+  /** Pedido de demostración sembrado para enseñar el panel; se borra desde Ajustes. */
+  demo?: boolean;
 };
 
 export type DeliveryZone = { id: string; name: string; fee: number };
@@ -119,6 +121,8 @@ export type Settings = {
   mapsUrl: string;
   bcvRate: number;
   bcvUpdatedAt: string;
+  /** Usa la tasa oficial publicada (ve.dolarapi.com) en vez de la escrita a mano. */
+  bcvAuto: boolean;
   deliveryZones: DeliveryZone[];
   couriers: string[];
   nationalNote: string;
