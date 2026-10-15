@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mr.Brands — tienda y panel
 
-## Getting Started
+Tienda en línea de **Mr.Brands**, la casa del flow en el CC Estación Central de Maracay, con su panel para el dueño.
 
-First, run the development server:
+- **Tienda** (`/`, `/tienda`, `/producto/...`): catálogo con precios en dólares y su equivalente en bolívares a tasa BCV, bolsa de compra y pedido directo con **delivery en Maracay**, **envío nacional** (MRW, Zoom, Tealca) o **retiro en tienda**. Pagos con pago móvil, Zelle, Binance, efectivo o **Cashea en cuotas**. Cada pedido recibe su **boleto** (`/pedido/[id]`), que muestra el estado en vivo y manda el comprobante por WhatsApp con un toque.
+- **Panel** (`/admin`): pedidos por cobrar, por preparar y por entregar, con botón de siguiente paso; ventas de 14 días, lo más vendido y stock bajo; alta y edición de productos con fotos, tallas y unidades; ajustes de tasa BCV, zonas de delivery, métodos de pago, Cashea, horario y contacto.
+
+Hecho con Next.js 16 (App Router, Cache Components), React 19 y Postgres (Neon). Funciona en celular y computadora.
+
+## Probarlo en tu computadora
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre http://localhost:3000. El panel está en http://localhost:3000/admin, con la contraseña `mrbrands2026` mientras no definas `ADMIN_PASSWORD`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Sin base de datos, la app usa un **modo demostración en memoria**, con el catálogo real y 18 pedidos de ejemplo. Todo se reinicia al apagar el servidor.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Publicarlo en Vercel
 
-## Learn More
+1. En [vercel.com/new](https://vercel.com/new), importa este repositorio. Vercel detecta Next.js solo.
+2. **Conecta la base de datos (necesario para guardar pedidos de verdad).** En el proyecto, ve a **Storage → Create Database → Neon (Postgres)** y conéctala. Vercel agrega `DATABASE_URL` sola. En la primera visita la app crea sus tablas y carga el catálogo.
+3. En **Settings → Environment Variables** agrega:
 
-To learn more about Next.js, take a look at the following resources:
+   | Variable | Para qué |
+   | --- | --- |
+   | `ADMIN_PASSWORD` | Contraseña del panel. **Cámbiala**: sin ella se usa `mrbrands2026`. |
+   | `SESSION_SECRET` | Texto largo y aleatorio para firmar la sesión del panel (por ejemplo, la salida de `openssl rand -hex 32`). |
+   | `NEXT_PUBLIC_SITE_URL` | Opcional: la dirección final, como `https://mrbrands.vercel.app`, para las vistas previas al compartir. |
+   | `DEMO_ORDERS` | Opcional: pon `false` si no quieres los pedidos de ejemplo al crear la base de datos. |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. Vuelve a desplegar (**Deployments → Redeploy**) para que tome las variables.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+> Sin base de datos también despliega, pero en Vercel cada servidor tiene su propia memoria: un pedido puede no aparecer en el panel. Para enseñarlo al dueño, conecta Neon (es gratis).
 
-## Deploy on Vercel
+## Antes de abrir la tienda
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Hay datos de ejemplo que el dueño debe confirmar o cambiar desde el panel:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Precios** de franelas, jorts y monos (las gorras a $25 salen de su catálogo de WhatsApp; las baby tee "Pronto" no están cargadas todavía).
+- **Marcas** asignadas a cada producto, sobre todo el Jort Tinta y la Gorra Firma Negra.
+- **Datos de pago** en Ajustes: banco y cédula del pago móvil, correo de Zelle e ID de Binance. Ahora son de ejemplo.
+- **Zonas de delivery y precios** en Maracay.
+- **Plan de Cashea**: inicial, número de cuotas y cada cuántos días.
+- Los textos de **"Paso a paso"** (la historia) se escribieron a partir de su video "Nuestra historia como emprendedores en Venezuela". Conviene que el dueño los revise.
+- Borra los **pedidos de demostración** en Ajustes.
+
+## Tasa BCV
+
+Con "Actualizar la tasa sola" activado, el servidor consulta la tasa oficial publicada en `ve.dolarapi.com` cada hora. Si no responde, usa la tasa escrita a mano en Ajustes. El botón **Traer tasa oficial** la actualiza al momento. Cada pedido guarda la tasa del día en que se hizo.
+
+## Fotos
+
+Todas las fotos son de Mr.Brands: sus publicaciones y videos de Instagram y TikTok, recortadas y comprimidas en `public/img`. El video de las gorras está en `public/media`. Las fotos que el dueño sube desde el panel se guardan comprimidas en la base de datos y se sirven desde `/api/imagen/[id]`.
+
+## Estructura
+
+```
+src/app/(shop)            tienda: inicio, tienda, producto, pedido, boleto
+src/app/admin             panel: resumen, pedidos, productos, ajustes, login
+src/app/api/imagen/[id]   fotos subidas desde el panel
+src/lib/store             datos: Postgres (Neon) o memoria, misma interfaz
+src/lib/catalog.ts        lecturas en caché de la tienda (se invalidan al cambiar algo)
+src/proxy.ts              protege /admin
+```
+
+Comandos: `npm run dev`, `npm run build`, `npm run lint`.

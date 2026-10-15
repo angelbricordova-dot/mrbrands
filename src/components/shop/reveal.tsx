@@ -26,10 +26,16 @@ export function RevealObserver() {
     );
     const scan = () =>
       document.querySelectorAll("[data-reveal]:not([data-in]), .lines:not([data-in]), .story__item:not([data-in])").forEach((el) => io.observe(el));
-    scan();
     const mo = new MutationObserver(scan);
-    mo.observe(document.body, { childList: true, subtree: true });
+    // Start once the browser is idle, so React has finished hydrating before any attribute is added.
+    const idle = window.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 200));
+    const cancel = window.cancelIdleCallback ?? window.clearTimeout;
+    const handle = idle(() => {
+      scan();
+      mo.observe(document.body, { childList: true, subtree: true });
+    }, { timeout: 600 });
     return () => {
+      cancel(handle);
       io.disconnect();
       mo.disconnect();
     };

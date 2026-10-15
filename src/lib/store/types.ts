@@ -29,4 +29,9 @@ export interface Store {
   /** Cambia estado o pago. Cancelar devuelve el stock; reactivar un pedido cancelado lo vuelve a reservar. */
   updateOrder(id: string, patch: OrderPatch): Promise<Order>;
   deleteDemoOrders(): Promise<number>;
+  /** Uploaded product photos, kept as compressed WebP and served from /api/imagen/[id]. */
+  saveImage(image: StoredImage): Promise<void>;
+  getImage(id: string): Promise<StoredImage | null>;
 }
+
+export type StoredImage = { id: string; mime: string; base64: string };

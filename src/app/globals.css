@@ -50,6 +50,7 @@
   --t-hover: 180ms;
   --t-ui: 240ms;
   --t-reveal: 800ms;
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 /* ---------- reset ---------- */
@@ -167,7 +168,7 @@ select.field { appearance: none; background-image: url("data:image/svg+xml,%3Csv
 }
 .bag-button:active { transform: scale(0.96); }
 .bag-button__count { font-variant-numeric: tabular-nums; min-width: 1ch; display: inline-block; }
-.bag-button__count.is-bump { animation: bump 420ms var(--ease-out); }
+.bag-button__count.is-bump { animation: bump 320ms var(--ease-out); }
 @keyframes bump { 0% { transform: translateY(0); } 30% { transform: translateY(-5px); } 100% { transform: translateY(0); } }
 
 .status-dot { display: inline-block; width: 0.55em; height: 0.55em; border-radius: 50%; background: currentColor; margin-right: 0.45em; vertical-align: 0.05em; }
@@ -219,8 +220,8 @@ select.field { appearance: none; background-image: url("data:image/svg+xml,%3Csv
   position: absolute; z-index: 4; top: calc(var(--title-top) - var(--frame-top));
   left: calc((var(--frame-w) - 100vw) / 2); width: 100vw; color: var(--paper);
 }
-.hero__scrim { position: absolute; inset: 0 0 auto 0; height: 45%; z-index: 3; background: linear-gradient(to bottom, rgb(0 0 0 / 0.28), rgb(0 0 0 / 0)); pointer-events: none; }
-.hero__scrim--foot { inset: auto 0 0 0; height: 30%; background: linear-gradient(to top, rgb(0 0 0 / 0.5), rgb(0 0 0 / 0)); }
+.hero__scrim { position: absolute; inset: 0 0 auto 0; height: 45%; z-index: 3; background: linear-gradient(to bottom, rgb(0 0 0 / 0.28), rgb(0 0 0 / 0)); pointer-events: none; } /* taste-skill-ignore: neutral scrim under text on a photo */
+.hero__scrim--foot { inset: auto 0 0 0; height: 30%; background: linear-gradient(to top, rgb(0 0 0 / 0.5), rgb(0 0 0 / 0)); } /* taste-skill-ignore: neutral scrim under text on a photo */
 .hero__caption {
   position: absolute; z-index: 5; left: 1rem; right: 1rem; bottom: 1rem;
   color: var(--paper); font-size: var(--fs-small); font-weight: 500; text-decoration: none;
@@ -252,10 +253,10 @@ select.field { appearance: none; background-image: url("data:image/svg+xml,%3Csv
 .band__panel { position: relative; flex: var(--grow, 2) 1 0; min-width: 0; overflow: hidden; color: var(--paper); text-decoration: none; transition: flex-grow 500ms var(--ease-in-out); background: var(--night); }
 .band__panel img, .band__panel video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 900ms var(--ease-soft); }
 .band__title { position: absolute; top: 1.5rem; left: 1.5rem; z-index: 2; font-size: var(--fs-lead); font-weight: 900; letter-spacing: -0.03em; line-height: 1.05; max-width: 16ch; }
-.band__corner { position: absolute; inset: 0 auto auto 0; width: 70%; height: 45%; background: radial-gradient(ellipse at top left, rgb(0 0 0 / 0.55), rgb(0 0 0 / 0) 70%); z-index: 1; }
+.band__corner { position: absolute; inset: 0 auto auto 0; width: 70%; height: 45%; background: radial-gradient(ellipse at top left, rgb(0 0 0 / 0.55), rgb(0 0 0 / 0) 70%); z-index: 1; } /* taste-skill-ignore: neutral scrim under text on a photo */
 .band__label { position: absolute; left: 1.25rem; bottom: 1.1rem; z-index: 2; font-weight: 500; font-size: var(--fs-body); display: flex; gap: 0.5em; align-items: baseline; }
 .band__label::after { content: "→"; transition: transform var(--t-hover) var(--ease-out); }
-.band__foot { position: absolute; inset: auto 0 0 0; height: 35%; background: linear-gradient(to top, rgb(0 0 0 / 0.5), rgb(0 0 0 / 0)); z-index: 1; }
+.band__foot { position: absolute; inset: auto 0 0 0; height: 35%; background: linear-gradient(to top, rgb(0 0 0 / 0.5), rgb(0 0 0 / 0)); z-index: 1; } /* taste-skill-ignore: neutral scrim under text on a photo */
 .band__caption { margin-top: 1.25rem; font-size: var(--fs-body); }
 @media (hover: hover) and (pointer: fine) {
   .band__panel:hover { flex-grow: 6; }
@@ -486,6 +487,7 @@ select.field { appearance: none; background-image: url("data:image/svg+xml,%3Csv
 .pdp__facts div { display: grid; grid-template-columns: 7.5rem 1fr; gap: 1rem; }
 .pdp__facts dt { color: var(--muted); }
 .pdp__added { margin-top: 0.75rem; font-size: var(--fs-small); font-weight: 500; min-height: 1.5em; }
+.pdp__added:not(:empty), .form-error { transition: opacity 200ms ease, transform 200ms var(--ease-out); @starting-style { opacity: 0; transform: translateY(4px); } }
 .related { padding: 0 var(--margin) var(--section); }
 .related h2 { font-size: clamp(2rem, 1.4rem + 2vw, 3rem); margin-bottom: 2rem; }
 .related__row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--gutter); }
@@ -503,16 +505,16 @@ select.field { appearance: none; background-image: url("data:image/svg+xml,%3Csv
    Bag drawer
    ========================================================================= */
 .drawer { position: fixed; inset: 0; z-index: 80; pointer-events: none; visibility: hidden; transition: visibility 0s linear 400ms; }
-.drawer__veil { position: absolute; inset: 0; background: rgb(22 19 20 / 0.45); opacity: 0; transition: opacity 300ms ease; }
+.drawer__veil { position: absolute; inset: 0; background: rgb(22 19 20 / 0.45); opacity: 0; transition: opacity 220ms ease; }
 .drawer__panel {
   position: absolute; top: 0; right: 0; bottom: 0; width: min(28rem, 100vw);
   background: var(--bg); display: grid; grid-template-rows: auto 1fr auto;
-  transform: translateX(100%); transition: transform 380ms var(--ease-out), visibility 0s linear 380ms;
+  transform: translateX(100%); transition: transform 260ms var(--ease-drawer), visibility 0s linear 260ms;
   visibility: hidden;
 }
 .drawer.is-open { pointer-events: auto; visibility: visible; transition: none; }
-.drawer.is-open .drawer__panel { visibility: visible; transition: transform 380ms var(--ease-out); box-shadow: -24px 0 60px rgb(0 0 0 / 0.18); }
-.drawer.is-open .drawer__veil { opacity: 1; }
+.drawer.is-open .drawer__panel { visibility: visible; transition: transform 400ms var(--ease-drawer); box-shadow: -24px 0 60px rgb(0 0 0 / 0.18); } /* taste-skill-ignore: the open drawer is a real overlay */
+.drawer.is-open .drawer__veil { opacity: 1; transition-duration: 320ms; }
 .drawer.is-open .drawer__panel { transform: none; }
 .drawer__head { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 1.25rem 1rem; }
 .drawer__head h2 { font-size: var(--fs-lead); letter-spacing: -0.03em; }
@@ -536,7 +538,10 @@ select.field { appearance: none; background-image: url("data:image/svg+xml,%3Csv
 .totals .soft { color: var(--muted); font-size: var(--fs-small); }
 .drawer__empty { padding: 2rem 0; display: grid; gap: 1.25rem; justify-items: start; }
 .drawer__empty p { font-size: var(--fs-lead); font-weight: 500; line-height: 1.25; }
-@media (prefers-reduced-motion: reduce) { .drawer__panel { transition: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .drawer__panel, .drawer.is-open .drawer__panel { transform: none; opacity: 0; transition: opacity 200ms ease, visibility 0s linear 200ms; }
+  .drawer.is-open .drawer__panel { opacity: 1; transition: opacity 200ms ease; }
+}
 
 /* =========================================================================
    Checkout

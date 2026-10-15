@@ -1,21 +1,28 @@
 import { randomUUID } from "node:crypto";
-import { Pool, neonConfig, type PoolClient } from "@neondatabase/serverless";
+import { Pool as NeonPool, neonConfig } from "@neondatabase/serverless";
+import { Pool as PgPool, type PoolClient } from "pg";
 import { demoOrders } from "../demo-orders";
 import { defaultSettings, seedProducts } from "../seed";
 import type { Order, Product, Settings } from "../types";
 import { applyStock, orderCode, patchOrder } from "./shared";
-import type { NewOrder, OrderPatch, Store } from "./types";
+import type { NewOrder, OrderPatch, Store, StoredImage } from "./types";
 
 if (typeof WebSocket !== "undefined") neonConfig.webSocketConstructor = WebSocket;
 
-const globalForPg = globalThis as unknown as { __mrbrandsPool?: Pool; __mrbrandsReady?: Promise<void> };
+const globalForPg = globalThis as unknown as { __mrbrandsPool?: PgPool; __mrbrandsReady?: Promise<void> };
 
-function pool() {
-  globalForPg.__mrbrandsPool ??= new Pool({
-    connectionString: process.env.DATABASE_URL ?? process.env.POSTGRES_URL,
-    max: 5,
-    idleTimeoutMillis: 10_000,
-  });
+/**
+ * Neon (what Vercel's Storage tab creates) is reached over its serverless WebSocket driver;
+ * any other Postgres (Supabase, Railway, a local server) over the standard `pg` driver.
+ * Both expose the same Pool API.
+ */
+function pool(): PgPool {
+  if (!globalForPg.__mrbrandsPool) {
+    const connectionString = process.env.DATABASE_URL ?? process.env.POSTGRES_URL;
+    const options = { connectionString, max: 5, idleTimeoutMillis: 10_000 };
+    const isNeon = /\.neon\.tech|neon\.build/.test(connectionString ?? "");
+    globalForPg.__mrbrandsPool = isNeon ? (new NeonPool(options) as unknown as PgPool) : new PgPool(options);
+  }
   return globalForPg.__mrbrandsPool;
 }
 
@@ -47,6 +54,7 @@ function ready() {
       CREATE INDEX IF NOT EXISTS mb_orders_created ON mb_orders (created_at DESC);
       CREATE TABLE IF NOT EXISTS mb_settings (id int PRIMARY KEY, data jsonb NOT NULL);
       CREATE SEQUENCE IF NOT EXISTS mb_order_seq;
+      CREATE TABLE IF NOT EXISTS mb_images (id text PRIMARY KEY, mime text NOT NULL, data text NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
     `);
     const settingsRow = await c.query("SELECT 1 FROM mb_settings WHERE id = 1");
     if (settingsRow.rowCount === 0) {
@@ -170,5 +178,13 @@ export const postgresStore: Store = {
   async deleteDemoOrders() {
     const rows = await query<{ id: string }>("DELETE FROM mb_orders WHERE demo RETURNING id");
     return rows.length;
+  },
+  async saveImage(image) {
+    await query("INSERT INTO mb_images (id, mime, data) VALUES ($1, $2, $3) ON CONFLICT (id) DO NOTHING", [image.id, image.mime, image.base64]);
+  },
+  async getImage(id) {
+    const rows = await query<{ id: string; mime: string; data: string }>("SELECT id, mime, data FROM mb_images WHERE id = $1", [id]);
+    const row = rows[0];
+    return row ? ({ id: row.id, mime: row.mime, base64: row.data } satisfies StoredImage) : null;
   },
 };

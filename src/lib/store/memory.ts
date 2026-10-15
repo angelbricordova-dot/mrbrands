@@ -3,9 +3,9 @@ import { demoOrders } from "../demo-orders";
 import { defaultSettings, seedProducts } from "../seed";
 import type { Order, Product, Settings } from "../types";
 import { applyStock, orderCode, patchOrder } from "./shared";
-import type { NewOrder, OrderPatch, Store } from "./types";
+import type { NewOrder, OrderPatch, Store, StoredImage } from "./types";
 
-type State = { products: Map<string, Product>; orders: Order[]; settings: Settings; seq: number };
+type State = { products: Map<string, Product>; orders: Order[]; settings: Settings; seq: number; images: Map<string, StoredImage> };
 
 const globalForStore = globalThis as unknown as { __mrbrandsMemory?: State };
 
@@ -19,6 +19,7 @@ function state(): State {
       orders,
       settings,
       seq: orders.length,
+      images: new Map(),
     };
   }
   return globalForStore.__mrbrandsMemory;
@@ -92,5 +93,11 @@ export const memoryStore: Store = {
     const before = s.orders.length;
     s.orders = s.orders.filter((o) => !o.demo);
     return before - s.orders.length;
+  },
+  async saveImage(image) {
+    state().images.set(image.id, image);
+  },
+  async getImage(id) {
+    return state().images.get(id) ?? null;
   },
 };
