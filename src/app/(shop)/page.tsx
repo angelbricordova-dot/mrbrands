@@ -9,18 +9,19 @@ import { getCatalog, getShopSettings } from "@/lib/catalog";
 import { prettyPhone, to12h, usd, waLink } from "@/lib/format";
 import { CATEGORIES } from "@/lib/types";
 
-const HERO: { slug: string; ground: string; alt: string }[] = [
-  { slug: "camiseta-brand-world-roja", ground: "#d2c7c4", alt: "Chico con pasamontañas y la camiseta roja de Brand World, sentado contra una pared de concreto" },
-  { slug: "mono-odyssea-negro", ground: "#d8d4cd", alt: "Mono Odyssea negro de pierna ancha con franela sin mangas, en la tienda" },
-  { slug: "gorra-bars-roja", ground: "#d7cecb", alt: "Gorra roja Bars puesta, frente a una pared de concreto" },
-  { slug: "camiseta-brand-world-blanca", ground: "#c9c7c3", alt: "Espalda de la camiseta blanca B.WORLD con el 7 gigante" },
+// Tall dark-ground illustrations (public/illus/hero) so the paper half of BRANDS reads over them.
+const HERO: { slug: string; art: string; ground: string; alt: string }[] = [
+  { slug: "jersey-topo-rojo", art: "jersey-topo-rojo", ground: "#dcd2cf", alt: "Ilustración del jersey rojo con líneas topográficas, MARACAY al pecho y el 07" },
+  { slug: "hoodie-carpe-diem", art: "hoodie-carpe-marron", ground: "#d6d5cc", alt: "Ilustración del hoodie café con CARPE DIEM en crema" },
+  { slug: "mono-odyssea-crema", art: "mono-odyssea-crema", ground: "#e4dbd5", alt: "Ilustración del mono Odyssea crema de pierna ancha sobre fondo rojo" },
+  { slug: "jort-tinta", art: "jort-tinta", ground: "#d4d7db", alt: "Ilustración del jort de denim claro con trazos de tinta" },
 ];
 
 const STORY = [
   { img: "serigrafia", name: "La serigrafía", role: "Donde empezó", text: "Nuestra historia como emprendedores arrancó entre máquinas de coser y pulpos de serigrafía, color por color." },
   { img: "corte", name: "El corte", role: "Patrón, tela y tijera", text: "Nada es de un día para otro. Cada prenda pasó por una mesa de corte antes de llegar a un gancho." },
-  { img: "tienda-llena", name: "La tienda", role: "CC Estación Central", text: "Un local propio en Maracay con Carpediem, Brand World, Odyssea, about:blank y Bars, y gente que sabe de tallas." },
-  { img: "calle-maracay", name: "La calle", role: "Maracay", text: "También salimos a regalar ropa oversize por las calles de la ciudad. Así se gobierna la jungla de concreto." },
+  { img: "tienda", name: "La tienda", role: "CC Estación Central", text: "Un local propio en Maracay con Carpediem, Brand World, Odyssea, about:blank y Bars, y gente que sabe de tallas." },
+  { img: "calle", name: "La calle", role: "Maracay", text: "También salimos a regalar ropa oversize por las calles de la ciudad. Así se gobierna la jungla de concreto." },
 ];
 
 function rateDate(iso: string) {
@@ -34,7 +35,7 @@ export default async function Home() {
 
   const shots: HeroShot[] = HERO.flatMap((h) => {
     const p = bySlug.get(h.slug);
-    return p ? [{ src: p.images[0], alt: h.alt, ground: h.ground, name: p.name, price: usd(p.price), href: `/producto/${p.slug}` }] : [];
+    return p ? [{ src: `/illus/hero/${h.art}.svg`, alt: h.alt, ground: h.ground, name: p.name, price: usd(p.price), href: `/producto/${p.slug}` }] : [];
   });
   if (shots.length === 0 && catalog[0]) {
     const p = catalog[0];
@@ -100,7 +101,12 @@ export default async function Home() {
         </div>
         <div className="band" data-reveal="shutter">
           <Link href="/tienda?c=gorras" className="band__panel" style={{ "--grow": 5, "--k": 0 } as CSSProperties}>
-            <video src="/media/gorras.mp4" poster="/media/gorras.webp" autoPlay muted loop playsInline preload="metadata" aria-label="Probándose las gorras five panel de Carpediem y las Bars" />
+            <span className="band__cycle" role="img" aria-label="Ilustraciones de las gorras camuflada, roja y arena">
+              {["gorra-camo", "gorra-flow-roja", "gorra-beige"].map((g, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={g} src={`/illus/hero/${g}.svg`} alt="" width={800} height={1200} loading="lazy" style={{ "--n": i } as CSSProperties} />
+              ))}
+            </span>
             <span className="band__corner" />
             <span className="band__title">Gorras con flow</span>
             <span className="band__foot" />
@@ -108,19 +114,19 @@ export default async function Home() {
           </Link>
           <Link href="/tienda?marca=Brand%20World" className="band__panel" style={{ "--grow": 2, "--k": 1 } as CSSProperties}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/img/p/brandworld-blanca.webp" alt="Espalda de la camiseta B.WORLD" width={960} height={1200} loading="lazy" />
+            <img src="/illus/hero/jersey-siete-blanco.svg" alt="Ilustración del jersey blanco con el 7 de tres líneas" width={800} height={1200} loading="lazy" />
             <span className="band__foot" />
             <span className="band__label">Brand World</span>
           </Link>
           <Link href="/tienda?marca=Odyssea" className="band__panel" style={{ "--grow": 3, "--k": 2 } as CSSProperties}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/img/p/odyssea-crema.webp" alt="Mono Odyssea crema" width={720} height={900} loading="lazy" />
+            <img src="/illus/hero/mono-odyssea-negro.svg" alt="Ilustración del mono Odyssea negro" width={800} height={1200} loading="lazy" />
             <span className="band__foot" />
             <span className="band__label">Odyssea</span>
           </Link>
           <Link href="/tienda?marca=about%3Ablank" className="band__panel" style={{ "--grow": 2, "--k": 3 } as CSSProperties}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/img/p/aboutblank-blanca.webp" alt="Franela about:blank" width={960} height={1200} loading="lazy" />
+            <img src="/illus/hero/franela-blank-azul.svg" alt="Ilustración de la franela blanca con letras azules" width={800} height={1200} loading="lazy" />
             <span className="band__foot" />
             <span className="band__label">about:blank</span>
           </Link>
@@ -185,7 +191,7 @@ export default async function Home() {
             <figure key={s.img} className="story__item">
               <div className="story__photo">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/img/story/${s.img}.webp`} alt={s.name} width={720} height={900} loading="lazy" />
+                <img src={`/illus/story/${s.img}.svg`} alt={`Ilustración: ${s.name.toLowerCase()}`} width={800} height={1000} loading="lazy" />
               </div>
               <figcaption>
                 <p className="story__name">{s.name}</p>

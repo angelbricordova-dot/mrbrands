@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: { default: "Mr.Brands — Casa del flow en Maracay", template: "%s · Mr.Brands" },
   description:
     "Tienda multimarca de ropa urbana en el CC Estación Central, Maracay. Pide en línea: delivery en Maracay, envío a toda Venezuela o retiro en tienda.",
-  openGraph: { locale: "es_VE", siteName: "Mr.Brands", images: ["/img/p/brandworld-roja.webp"] },
+  openGraph: { locale: "es_VE", siteName: "Mr.Brands", images: ["/og.png"] },
 };
 
 export const viewport: Viewport = {

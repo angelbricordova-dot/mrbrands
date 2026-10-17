@@ -9,7 +9,7 @@ export default function LoginPage() {
     <div className="admin login">
       <div className="login__art" aria-hidden>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/img/story/tienda-llena.webp" alt="" width={720} height={900} />
+        <img src="/illus/story/tienda.svg" alt="" width={800} height={1000} />
       </div>
       <Suspense fallback={<div className="login__form" />}>
         <LoginForm />

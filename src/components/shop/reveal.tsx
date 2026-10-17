@@ -2,42 +2,60 @@
 
 import { useEffect } from "react";
 
+const SELECTOR = "[data-reveal]:not([data-in]), .lines:not([data-in]), .story__item:not([data-in])";
+
 /**
- * Marks every [data-reveal] element (and `.lines` blocks) with data-in the first time it enters the viewport.
+ * Marks every [data-reveal] element (and `.lines` blocks) with data-in once its top has risen above
+ * 88% of the viewport. Checking position on scroll, instead of waiting for an "entered" event, also
+ * reveals whatever a jump (an anchor link, a fast fling) carried past the viewport.
  * A data attribute, not a class, so React re-renders never wipe it.
  * Content is only hidden under html.js, so nothing stays invisible if this never runs.
  */
 export function RevealObserver() {
   useEffect(() => {
-    if (!("IntersectionObserver" in window)) {
-      document.querySelectorAll<HTMLElement>("[data-reveal], .lines").forEach((el) => (el.dataset.in = ""));
-      return;
-    }
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            (entry.target as HTMLElement).dataset.in = "";
-            io.unobserve(entry.target);
-          }
+    let pending: HTMLElement[] = [];
+    let frame = 0;
+
+    const check = () => {
+      frame = 0;
+      const line = window.innerHeight * 0.88;
+      pending = pending.filter((el) => {
+        if (!el.isConnected) return false;
+        if (el.getBoundingClientRect().top < line) {
+          el.dataset.in = "";
+          return false;
         }
-      },
-      { rootMargin: "0px 0px -12% 0px", threshold: 0.05 },
-    );
-    const scan = () =>
-      document.querySelectorAll("[data-reveal]:not([data-in]), .lines:not([data-in]), .story__item:not([data-in])").forEach((el) => io.observe(el));
+        return true;
+      });
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(check);
+    };
+    const scan = () => {
+      const known = new Set(pending);
+      document.querySelectorAll<HTMLElement>(SELECTOR).forEach((el) => !known.has(el) && pending.push(el));
+      schedule();
+    };
+
     const mo = new MutationObserver(scan);
     // Start once the browser is idle, so React has finished hydrating before any attribute is added.
     const idle = window.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 200));
     const cancel = window.cancelIdleCallback ?? window.clearTimeout;
-    const handle = idle(() => {
-      scan();
-      mo.observe(document.body, { childList: true, subtree: true });
-    }, { timeout: 600 });
+    const handle = idle(
+      () => {
+        scan();
+        mo.observe(document.body, { childList: true, subtree: true });
+      },
+      { timeout: 600 },
+    );
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
     return () => {
       cancel(handle);
-      io.disconnect();
+      cancelAnimationFrame(frame);
       mo.disconnect();
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
     };
   }, []);
   return null;

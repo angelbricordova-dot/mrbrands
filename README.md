@@ -51,9 +51,17 @@ Hay datos de ejemplo que el dueño debe confirmar o cambiar desde el panel:
 
 Con "Actualizar la tasa sola" activado, el servidor consulta la tasa oficial publicada en `ve.dolarapi.com` cada hora. Si no responde, usa la tasa escrita a mano en Ajustes. El botón **Traer tasa oficial** la actualiza al momento. Cada pedido guarda la tasa del día en que se hizo.
 
-## Fotos
+## Ilustraciones
 
-Todas las fotos son de Mr.Brands: sus publicaciones y videos de Instagram y TikTok, recortadas y comprimidas en `public/img`. El video de las gorras está en `public/media`. Las fotos que el dueño sube desde el panel se guardan comprimidas en la base de datos y se sirven desde `/api/imagen/[id]`.
+Esta versión es una **maqueta**: no usa fotos reales de la tienda. Cada prenda (jerseys, franelas, hoodie, monos, cargo, jorts y gorras), las escenas de la historia y la imagen para compartir son ilustraciones vectoriales originales, dibujadas con código en `scripts/illustrations/generate.mjs`. Los estampados son inventados (MARACAY, JUNGLA DE CONCRETO, CASA DEL FLOW): no copian el logo de ninguna marca.
+
+Para cambiar colores o dibujos, edita el script y vuelve a generarlas:
+
+```bash
+node scripts/illustrations/generate.mjs   # escribe public/illus/** y public/og.png
+```
+
+Cuando el dueño tenga fotos propias, se suben desde el panel (Productos → editar → Fotos) y reemplazan a la ilustración. Se guardan comprimidas en la base de datos y se sirven desde `/api/imagen/[id]`.
 
 ## Estructura
 
@@ -61,6 +69,7 @@ Todas las fotos son de Mr.Brands: sus publicaciones y videos de Instagram y TikT
 src/app/(shop)            tienda: inicio, tienda, producto, pedido, boleto
 src/app/admin             panel: resumen, pedidos, productos, ajustes, login
 src/app/api/imagen/[id]   fotos subidas desde el panel
+scripts/illustrations     generador de las ilustraciones (fuentes OFL incluidas)
 src/lib/store             datos: Postgres (Neon) o memoria, misma interfaz
 src/lib/catalog.ts        lecturas en caché de la tienda (se invalidan al cambiar algo)
 src/proxy.ts              protege /admin

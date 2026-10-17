@@ -252,6 +252,15 @@ select.field { appearance: none; background-image: url("data:image/svg+xml,%3Csv
 .band { display: flex; height: 68svh; min-height: 26rem; }
 .band__panel { position: relative; flex: var(--grow, 2) 1 0; min-width: 0; overflow: hidden; color: var(--paper); text-decoration: none; transition: flex-grow 500ms var(--ease-in-out); background: var(--night); }
 .band__panel img, .band__panel video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 900ms var(--ease-soft); }
+.band__cycle { position: absolute; inset: 0; }
+.band__cycle img { opacity: 0; }
+.band__cycle img:first-child { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  /* Three caps take turns, 3s each: the band's one moving picture. */
+  .band__cycle img { animation: cap-turn 9s var(--ease-in-out) infinite; animation-delay: calc(var(--n) * 3s - 3s); }
+  .band__cycle img:first-child { opacity: 0; }
+}
+@keyframes cap-turn { 0%, 30% { opacity: 1; } 36%, 94% { opacity: 0; } 100% { opacity: 1; } }
 .band__title { position: absolute; top: 1.5rem; left: 1.5rem; z-index: 2; font-size: var(--fs-lead); font-weight: 900; letter-spacing: -0.03em; line-height: 1.05; max-width: 16ch; }
 .band__corner { position: absolute; inset: 0 auto auto 0; width: 70%; height: 45%; background: radial-gradient(ellipse at top left, rgb(0 0 0 / 0.55), rgb(0 0 0 / 0) 70%); z-index: 1; } /* taste-skill-ignore: neutral scrim under text on a photo */
 .band__label { position: absolute; left: 1.25rem; bottom: 1.1rem; z-index: 2; font-weight: 500; font-size: var(--fs-body); display: flex; gap: 0.5em; align-items: baseline; }
@@ -283,7 +292,7 @@ select.field { appearance: none; background-image: url("data:image/svg+xml,%3Csv
 .board__name { display: none; }
 .board__table { grid-column: 7 / -1; grid-row: 1; }
 .board__preview { grid-column: 1 / span 5; grid-row: 1; align-self: start; position: sticky; top: 9vh; aspect-ratio: 4 / 5; max-height: 82vh; overflow: hidden; background: var(--surface-2); }
-.board__preview-label { position: absolute; left: 1rem; bottom: 1rem; z-index: 1; color: var(--paper); font-weight: 500; font-size: var(--fs-small); }
+.board__preview-label { position: absolute; left: 1rem; bottom: 1rem; z-index: 1; color: var(--ink); font-weight: 500; font-size: var(--fs-small); }
 .board__preview img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1.04); transition: opacity 320ms ease, transform 700ms var(--ease-soft); }
 .board__preview img.is-on { opacity: 1; transform: none; }
 .board__toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.75rem; font-size: var(--fs-small); }
